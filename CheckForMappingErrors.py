@@ -38,7 +38,7 @@ def readPSL(filename):
     f.close()
     return result
 
-# this class stores the result of a bat alignment and has a method to 
+# this class stores the result of a blat alignment and has a method to 
 # check for a variant at a particular position
 class BlatResult:
     def __init__(self, blatData):
@@ -96,7 +96,6 @@ def parseBlat(data):
     return results
 
 # the function calls and returns the output of the blat gfClient for a particular query sequence
-
 def callBlat(seq, tempFile, port="8888"):
     writeSeqToFile(seq, tempFile)
     blatData=subprocess.check_output([GFCLIENTLOCATION, "localhost", port, "/", tempFile, "stdout", "-out=pslx"])
@@ -177,6 +176,7 @@ def getVariantAndNormal(v, left, right):
         v.var=var
     return (leftSeq+var+rightSeq, leftSeq+ref+rightSeq)
 
+# this class represents a variant and has fields to store the alternative/mismap alignment score
 class variant:
     def __init__(self, chrom, pos, ref, var):
         self.chrom=chrom.strip("chr")
@@ -191,6 +191,7 @@ class variant:
     def toString(self):
         return("\t".join([self.chrom, str(self.pos), self.ref, self.blatRef, self.var, str(self.maxVarScore),str(self.maxRefScore), str(self.max100merScore)]))
 
+# reads an input file
 def readVariantFileFromPipeline(filename, mergeFile=True):
     f=open(filename, 'r')
     line=f.readline().strip()
@@ -224,6 +225,7 @@ def readVariantFileFromPipeline(filename, mergeFile=True):
     f.close()
     return result
 
+# writes an output file
 def writeOutput(variants, outputFile):
     f=open(outputFile, "w")
     f.write("\t".join(["Chrom", "Pos", "Ref", "BlatRef", "Var", "VarScore", "RefScore", "Max100merAlignment_CountingMismatches"]))
@@ -231,6 +233,7 @@ def writeOutput(variants, outputFile):
         f.write("\n"+v.toString())
     f.close()
 
+# run mismap analysis on an input file, left and right are the amount of sequence to consider on either side of the variant
 def run(inputFile, left, right, outputFile, tempFile, fileType, port="8888", verbose=True):
     if verbose: print "starting"
     variants=readVariantFileFromPipeline(inputFile, mergeFile=(fileType=="T")) 
@@ -248,6 +251,7 @@ def run(inputFile, left, right, outputFile, tempFile, fileType, port="8888", ver
         if verbose and i%100==0: print len(variants)-i
     writeOutput(variants, outputFile)
 
+# function to get command line options 
 def getOptions():
     parser = OptionParser()
     parser.add_option("--I", dest = "inputFile", help = "input file",
